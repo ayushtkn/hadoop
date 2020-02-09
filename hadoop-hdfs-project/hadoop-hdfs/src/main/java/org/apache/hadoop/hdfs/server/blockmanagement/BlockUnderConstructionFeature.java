@@ -23,6 +23,7 @@ import org.apache.hadoop.hdfs.server.common.HdfsServerConstants.BlockUCState;
 import org.apache.hadoop.hdfs.server.common.HdfsServerConstants.ReplicaState;
 import org.apache.hadoop.hdfs.server.namenode.NameNode;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -34,7 +35,7 @@ import static org.apache.hadoop.hdfs.server.common.HdfsServerConstants.BlockUCSt
  * Represents the under construction feature of a Block.
  * This is usually the last block of a file opened for write or append.
  */
-public class BlockUnderConstructionFeature {
+public class BlockUnderConstructionFeature implements Serializable {
   private BlockUCState blockUCState;
   private static final ReplicaUnderConstruction[] NO_REPLICAS =
       new ReplicaUnderConstruction[0];

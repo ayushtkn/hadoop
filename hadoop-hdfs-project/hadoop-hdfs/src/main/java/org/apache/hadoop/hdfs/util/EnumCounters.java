@@ -20,6 +20,7 @@ package org.apache.hadoop.hdfs.util;
 import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.ArrayUtils;
 
+import java.io.*;
 import java.util.Arrays;
 
 /**
@@ -34,7 +35,7 @@ import java.util.Arrays;
  *
  * @param <E> the enum type
  */
-public class EnumCounters<E extends Enum<E>> {
+public class EnumCounters<E extends Enum<E>> implements Serializable {
   /** The class of the enum. */
   private final Class<E> enumClass;
   /** An array of longs corresponding to the enum type. */

@@ -25,12 +25,13 @@ import org.apache.hadoop.hdfs.util.ConstEnumCounters;
 import org.apache.hadoop.hdfs.util.EnumCounters;
 import org.apache.hadoop.hdfs.util.ConstEnumCounters.ConstEnumException;
 
+import java.io.*;
 import java.util.function.Consumer;
 
 /**
  * Counters for namespace, storage space and storage type space quota and usage.
  */
-public class QuotaCounts {
+public class QuotaCounts implements Serializable {
 
   /**
    * We pre-define 4 most common used EnumCounters objects. When the nsSsCounts

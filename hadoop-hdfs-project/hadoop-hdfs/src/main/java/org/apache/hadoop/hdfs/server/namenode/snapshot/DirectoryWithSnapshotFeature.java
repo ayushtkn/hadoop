@@ -28,8 +28,7 @@ import org.apache.hadoop.hdfs.util.Diff.UndoInfo;
 import org.apache.hadoop.hdfs.util.ReadOnlyList;
 import org.apache.hadoop.security.AccessControlException;
 
-import java.io.DataOutput;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 import static org.apache.hadoop.hdfs.server.namenode.snapshot.Snapshot.NO_SNAPSHOT_ID;
@@ -40,7 +39,8 @@ import static org.apache.hadoop.hdfs.server.namenode.snapshot.Snapshot.NO_SNAPSH
  * made to the directory and its children for each snapshot.
  */
 @InterfaceAudience.Private
-public class DirectoryWithSnapshotFeature implements INode.Feature {
+public class DirectoryWithSnapshotFeature implements INode.Feature,
+    Serializable {
   /**
    * The difference between the current state and a previous snapshot
    * of the children list of an INodeDirectory.
@@ -296,7 +296,8 @@ public class DirectoryWithSnapshotFeature implements INode.Feature {
 
   /** A list of directory diffs. */
   public static class DirectoryDiffList
-      extends AbstractINodeDiffList<INodeDirectory, INodeDirectoryAttributes, DirectoryDiff> {
+      extends AbstractINodeDiffList<INodeDirectory, INodeDirectoryAttributes,
+      DirectoryDiff> implements Serializable{
 
     @Override
     DirectoryDiff createDiff(int snapshot, INodeDirectory currentDir) {

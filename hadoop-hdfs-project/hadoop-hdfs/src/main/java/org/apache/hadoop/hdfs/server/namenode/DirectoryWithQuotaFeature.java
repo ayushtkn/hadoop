@@ -27,10 +27,13 @@ import org.apache.hadoop.hdfs.server.namenode.snapshot.Snapshot;
 import org.apache.hadoop.hdfs.util.EnumCounters;
 import org.apache.hadoop.security.AccessControlException;
 
+import java.io.*;
+
 /**
  * Quota feature for {@link INodeDirectory}. 
  */
-public final class DirectoryWithQuotaFeature implements INode.Feature {
+public final class DirectoryWithQuotaFeature implements INode.Feature,
+    Serializable {
   public static final long DEFAULT_NAMESPACE_QUOTA = Long.MAX_VALUE;
   public static final long DEFAULT_STORAGE_SPACE_QUOTA = HdfsConstants.QUOTA_RESET;
 

@@ -262,6 +262,7 @@ class FSDirWriteFileOp {
     offset = pendingFile.computeFileSize();
 
     // Return located block
+    fsn.getFSDirectory().updateInode(pendingFile);
     return makeLocatedBlock(fsn, fsn.getStoredBlock(newBlock), targets, offset);
   }
 
@@ -520,6 +521,7 @@ class FSDirWriteFileOp {
       }
       fsd.getBlockManager().addBlockCollection(blockInfo, fileINode);
       fileINode.addBlock(blockInfo);
+      fsd.updateInode(fileINode);
 
       if(NameNode.stateChangeLog.isDebugEnabled()) {
         NameNode.stateChangeLog.debug("DIR* FSDirectory.addBlock: "
@@ -739,6 +741,7 @@ class FSDirWriteFileOp {
 
     fsn.finalizeINodeFileUnderConstruction(src, pendingFile,
         Snapshot.CURRENT_STATE_ID, true);
+    fsn.getFSDirectory().updateInode(pendingFile);
     return true;
   }
 

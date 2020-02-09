@@ -19,6 +19,7 @@ package org.apache.hadoop.hdfs.util;
 
 import org.apache.hadoop.util.Time;
 
+import java.io.*;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
@@ -36,7 +37,7 @@ import java.util.SortedSet;
  *
  * @param <E> Entry type
  */
-public class FoldedTreeSet<E> implements SortedSet<E> {
+public class FoldedTreeSet<E> implements SortedSet<E>, Serializable {
 
   private static final boolean RED = true;
   private static final boolean BLACK = false;
@@ -53,7 +54,7 @@ public class FoldedTreeSet<E> implements SortedSet<E> {
    *
    * @param <E> type of the elements
    */
-  private static class Node<E> {
+  private static class Node<E> implements Serializable {
 
     private static final int NODE_SIZE = 64;
 

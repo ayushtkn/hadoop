@@ -17,9 +17,7 @@
  */
 package org.apache.hadoop.hdfs.server.namenode;
 
-import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.*;
 import java.util.List;
 import java.util.Map;
 
@@ -56,7 +54,8 @@ import com.google.common.base.Preconditions;
  * directory inodes.
  */
 @InterfaceAudience.Private
-public abstract class INode implements INodeAttributes, Diff.Element<byte[]> {
+public abstract class INode implements INodeAttributes, Diff.Element<byte[]>,
+    Serializable {
   public static final Logger LOG = LoggerFactory.getLogger(INode.class);
 
   /** parent is either an {@link INodeDirectory} or an {@link INodeReference}.*/

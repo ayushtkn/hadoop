@@ -445,7 +445,7 @@ public final class FSImageFormatPBINode {
     }
 
     private boolean addToParent(INodeDirectory parentDir, INode child) {
-      if (parentDir == dir.rootDir && FSDirectory.isReservedName(child)) {
+      if (parentDir == dir.getRootDir() && FSDirectory.isReservedName(child)) {
         throw new HadoopIllegalArgumentException("File name \""
             + child.getLocalName() + "\" is reserved. Please "
             + " change the name of the existing file or directory to another "
@@ -564,22 +564,22 @@ public final class FSImageFormatPBINode {
       final long nsQuota = q.getNameSpace();
       final long dsQuota = q.getStorageSpace();
       if (nsQuota != -1 || dsQuota != -1) {
-        dir.rootDir.getDirectoryWithQuotaFeature().setQuota(nsQuota, dsQuota);
+        dir.getRootDir().getDirectoryWithQuotaFeature().setQuota(nsQuota, dsQuota);
       }
       final EnumCounters<StorageType> typeQuotas = q.getTypeSpaces();
       if (typeQuotas.anyGreaterOrEqual(0)) {
-        dir.rootDir.getDirectoryWithQuotaFeature().setQuota(typeQuotas);
+        dir.getRootDir().getDirectoryWithQuotaFeature().setQuota(typeQuotas);
       }
-      dir.rootDir.cloneModificationTime(root);
-      dir.rootDir.clonePermissionStatus(root);
+      dir.getRootDir().cloneModificationTime(root);
+      dir.getRootDir().clonePermissionStatus(root);
       final AclFeature af = root.getFeature(AclFeature.class);
       if (af != null) {
-        dir.rootDir.addAclFeature(af);
+        dir.getRootDir().addAclFeature(af);
       }
       // root dir supports having extended attributes according to POSIX
       final XAttrFeature f = root.getXAttrFeature();
       if (f != null) {
-        dir.rootDir.addXAttrFeature(f);
+        dir.getRootDir().addXAttrFeature(f);
       }
       dir.addRootDirToEncryptionZone(f);
     }

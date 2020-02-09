@@ -20,6 +20,8 @@ package org.apache.hadoop.hdfs.server.blockmanagement;
 import org.apache.hadoop.hdfs.protocol.Block;
 import org.apache.hadoop.hdfs.server.common.HdfsServerConstants;
 
+import java.io.*;
+
 /**
  * ReplicaUnderConstruction contains information about replicas (or blocks
  * belonging to a block group) while they are under construction.
@@ -30,7 +32,7 @@ import org.apache.hadoop.hdfs.server.common.HdfsServerConstants;
  * It is not guaranteed, but expected, that datanodes actually have
  * corresponding replicas.
  */
-class ReplicaUnderConstruction extends Block {
+class ReplicaUnderConstruction extends Block implements Serializable {
   private final DatanodeStorageInfo expectedLocation;
   private HdfsServerConstants.ReplicaState state;
   private boolean chosenAsPrimary;

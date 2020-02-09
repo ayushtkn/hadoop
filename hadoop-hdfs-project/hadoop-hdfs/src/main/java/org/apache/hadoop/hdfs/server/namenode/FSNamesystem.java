@@ -3635,6 +3635,7 @@ public class FSNamesystem implements Namesystem, FSNamesystemMBean,
     assert hasWriteLock();
     Preconditions.checkArgument(fileINode.isUnderConstruction());
     blockManager.commitOrCompleteLastBlock(fileINode, commitBlock, iip);
+    getFSDirectory().updateInode(fileINode);
   }
 
   void addCommittedBlocksToPending(final INodeFile pendingFile) {
@@ -3650,6 +3651,7 @@ public class FSNamesystem implements Namesystem, FSNamesystemMBean,
         blockManager.addExpectedReplicasToPending(b);
       }
     }
+    getFSDirectory().updateInode(pendingFile);
   }
 
   void finalizeINodeFileUnderConstruction(String src, INodeFile pendingFile,
@@ -3905,6 +3907,7 @@ public class FSNamesystem implements Namesystem, FSNamesystemMBean,
     //remove lease, close file
     int s = Snapshot.findLatestSnapshot(pendingFile, Snapshot.CURRENT_STATE_ID);
     finalizeINodeFileUnderConstruction(src, pendingFile, s, false);
+    getFSDirectory().updateInode(pendingFile);
   }
 
   /**

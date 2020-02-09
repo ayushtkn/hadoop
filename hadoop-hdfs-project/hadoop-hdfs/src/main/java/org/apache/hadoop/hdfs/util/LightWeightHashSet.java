@@ -17,7 +17,7 @@
  */
 package org.apache.hadoop.hdfs.util;
 
-import java.io.PrintStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  * This class is not thread safe.
  *
  */
-public class LightWeightHashSet<T> implements Collection<T> {
+public class LightWeightHashSet<T> implements Collection<T>, Serializable {
   /**
    * Elements of {@link LightWeightLinkedSet}.
    */

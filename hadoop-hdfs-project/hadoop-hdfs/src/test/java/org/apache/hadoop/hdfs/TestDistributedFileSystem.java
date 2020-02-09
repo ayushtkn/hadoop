@@ -924,62 +924,21 @@ public class TestDistributedFileSystem {
   @Test
   public void testECStatistics() throws IOException {
     try (MiniDFSCluster cluster =
-        new MiniDFSCluster.Builder(getTestConfiguration()).build()) {
+        new MiniDFSCluster.Builder(getTestConfiguration()).numDataNodes(5).build()) {
       cluster.waitActive();
       final DistributedFileSystem dfs = cluster.getFileSystem();
       Path dir = new Path("/test");
       dfs.mkdirs(dir);
-      int readOps = 0;
-      int writeOps = 0;
-      FileSystem.clearStatistics();
-
-      long opCount = getOpStatistics(OpType.ENABLE_EC_POLICY);
-      dfs.enableErasureCodingPolicy("RS-10-4-1024k");
-      checkStatistics(dfs, readOps, ++writeOps, 0);
-      checkOpStatistics(OpType.ENABLE_EC_POLICY, opCount + 1);
-
-      opCount = getOpStatistics(OpType.SET_EC_POLICY);
-      dfs.setErasureCodingPolicy(dir, "RS-10-4-1024k");
-      checkStatistics(dfs, readOps, ++writeOps, 0);
-      checkOpStatistics(OpType.SET_EC_POLICY, opCount + 1);
-
-      opCount = getOpStatistics(OpType.GET_EC_POLICY);
-      dfs.getErasureCodingPolicy(dir);
-      checkStatistics(dfs, ++readOps, writeOps, 0);
-      checkOpStatistics(OpType.GET_EC_POLICY, opCount + 1);
-
-      opCount = getOpStatistics(OpType.UNSET_EC_POLICY);
-      dfs.unsetErasureCodingPolicy(dir);
-      checkStatistics(dfs, readOps, ++writeOps, 0);
-      checkOpStatistics(OpType.UNSET_EC_POLICY, opCount + 1);
-
-      opCount = getOpStatistics(OpType.GET_EC_POLICIES);
-      dfs.getAllErasureCodingPolicies();
-      checkStatistics(dfs, ++readOps, writeOps, 0);
-      checkOpStatistics(OpType.GET_EC_POLICIES, opCount + 1);
-
-      opCount = getOpStatistics(OpType.GET_EC_CODECS);
-      dfs.getAllErasureCodingCodecs();
-      checkStatistics(dfs, ++readOps, writeOps, 0);
-      checkOpStatistics(OpType.GET_EC_CODECS, opCount + 1);
-
-      ErasureCodingPolicy newPolicy =
-          new ErasureCodingPolicy(new ECSchema("rs", 5, 3), 1024 * 1024);
-
-      opCount = getOpStatistics(OpType.ADD_EC_POLICY);
-      dfs.addErasureCodingPolicies(new ErasureCodingPolicy[] {newPolicy});
-      checkStatistics(dfs, readOps, ++writeOps, 0);
-      checkOpStatistics(OpType.ADD_EC_POLICY, opCount + 1);
-
-      opCount = getOpStatistics(OpType.REMOVE_EC_POLICY);
-      dfs.removeErasureCodingPolicy("RS-5-3-1024k");
-      checkStatistics(dfs, readOps, ++writeOps, 0);
-      checkOpStatistics(OpType.REMOVE_EC_POLICY, opCount + 1);
-
-      opCount = getOpStatistics(OpType.DISABLE_EC_POLICY);
-      dfs.disableErasureCodingPolicy("RS-10-4-1024k");
-      checkStatistics(dfs, readOps, ++writeOps, 0);
-      checkOpStatistics(OpType.DISABLE_EC_POLICY, opCount + 1);
+      FSDataOutputStream out = dfs.create(new Path("/test/file"));
+      out.write("ayush".getBytes());
+      out.close();
+      FSDataInputStream in = dfs.open(new Path("/test/file"));
+      byte[] buff = new byte[5];
+      in.read(buff);
+      String s = new String(buff);
+      in.close();
+      FileStatus fileS = dfs.getFileStatus(new Path("/test/file"));
+      dfs.getFileStatus(dir);
     }
   }
 
@@ -2089,4 +2048,7 @@ public class TestDistributedFileSystem {
       assertFalse(result.isSupported());
     }
   }
+
+
+
 }

@@ -395,6 +395,15 @@ public class INodeFile extends INodeWithAdditionalFields
     this.blocks[index] = blk;
   }
 
+  public void replaceBlock(BlockInfo blk) {
+    for (int i = 0; i < this.blocks.length; i++) {
+      if (this.blocks[i].getBlockId() == blk.getBlockId()) {
+        this.blocks[i] = blk;
+        break;
+      }
+    }
+  }
+
   @Override // BlockCollection, the file should be under construction
   public void convertLastBlockToUC(BlockInfo lastBlock,
       DatanodeStorageInfo[] locations) throws IOException {

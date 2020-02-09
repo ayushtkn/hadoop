@@ -23,6 +23,8 @@ import org.apache.hadoop.fs.StorageType;
 import org.apache.hadoop.hdfs.protocol.Block;
 import org.apache.hadoop.hdfs.protocol.BlockType;
 
+import java.io.*;
+
 /**
  * Subclass of {@link BlockInfo}, used for a block with replication scheme.
  */
@@ -32,6 +34,7 @@ public class BlockInfoContiguous extends BlockInfo {
   public BlockInfoContiguous(short size) {
     super(size);
   }
+
 
   public BlockInfoContiguous(Block blk, short size) {
     super(blk, size);

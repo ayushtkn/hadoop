@@ -17,10 +17,7 @@
  */
 package org.apache.hadoop.hdfs.protocol;
 
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -45,7 +42,7 @@ import org.apache.hadoop.io.WritableFactory;
  */
 @InterfaceAudience.Private
 @InterfaceStability.Evolving
-public class Block implements Writable, Comparable<Block> {
+public class Block implements Writable, Comparable<Block>, Serializable {
   public static final String BLOCK_FILE_PREFIX = "blk_";
   public static final String METADATA_EXTENSION = ".meta";
   static {                                      // register a ctor

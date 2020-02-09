@@ -17,7 +17,10 @@
  */
 package org.apache.hadoop.mapreduce.checkpoint;
 
-public enum EnumCounter {
+import java.io.*;
+
+public enum EnumCounter implements Serializable
+{
   INPUTKEY,
   INPUTVALUE,
   OUTPUTRECORDS,

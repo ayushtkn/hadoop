@@ -456,10 +456,10 @@ public class FSImageFormat {
     final long dsQuota = q.getStorageSpace();
     FSDirectory fsDir = namesystem.dir;
     if (nsQuota != -1 || dsQuota != -1) {
-      fsDir.rootDir.getDirectoryWithQuotaFeature().setQuota(nsQuota, dsQuota);
+      fsDir.getRootDir().getDirectoryWithQuotaFeature().setQuota(nsQuota, dsQuota);
     }
-    fsDir.rootDir.cloneModificationTime(root);
-    fsDir.rootDir.clonePermissionStatus(root);    
+    fsDir.getRootDir().cloneModificationTime(root);
+    fsDir.getRootDir().clonePermissionStatus(root);
   }
   
     /**
@@ -617,7 +617,7 @@ public class FSImageFormat {
     byte[][] pathComponents;
     byte[][] parentPath = {{}};      
     FSDirectory fsDir = namesystem.dir;
-    INodeDirectory parentINode = fsDir.rootDir;
+    INodeDirectory parentINode = fsDir.getRootDir();
     for (long i = 0; i < numFiles; i++) {
       pathComponents = FSImageSerialization.readPathComponents(in);
       for (int j=0; j < pathComponents.length; j++) {
@@ -670,7 +670,7 @@ public class FSImageFormat {
   private void addToParent(INodeDirectory parent, INode child)
       throws IllegalReservedPathException {
     FSDirectory fsDir = namesystem.dir;
-    if (parent == fsDir.rootDir) {
+    if (parent == fsDir.getRootDir()) {
         child.setLocalName(renameReservedRootComponentOnUpgrade(
             child.getLocalNameBytes(), getLayoutVersion()));
     }
@@ -1240,7 +1240,7 @@ public class FSImageFormat {
       checkNotSaved();
 
       final FSNamesystem sourceNamesystem = context.getSourceNamesystem();
-      final INodeDirectory rootDir = sourceNamesystem.dir.rootDir;
+      final INodeDirectory rootDir = sourceNamesystem.dir.getRootDir();
       final long numINodes = rootDir.getDirectoryWithQuotaFeature()
           .getSpaceConsumed().getNameSpace();
       String sdPath = newFile.getParentFile().getParentFile().getAbsolutePath();

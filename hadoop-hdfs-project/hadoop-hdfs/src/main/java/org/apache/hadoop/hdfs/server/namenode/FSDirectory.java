@@ -151,7 +151,7 @@ public class FSDirectory implements Closeable {
         .isdir(true)
         .build();
 
-  INodeDirectory rootDir;
+  long rootID;
   private final FSNamesystem namesystem;
   private volatile boolean skipQuotaCheck = false; //skip while consuming edits
   private final int maxComponentLength;
@@ -275,7 +275,8 @@ public class FSDirectory implements Closeable {
   FSDirectory(FSNamesystem ns, Configuration conf) throws IOException {
     this.dirLock = new ReentrantReadWriteLock(true); // fair
     this.inodeId = new INodeId();
-    rootDir = createRoot(ns);
+    INodeDirectory rootDir = createRoot(ns);
+    rootID = rootDir.getId();
     inodeMap = INodeMap.newInstance(rootDir);
     this.isPermissionEnabled = conf.getBoolean(
       DFSConfigKeys.DFS_PERMISSIONS_ENABLED_KEY,
@@ -392,6 +393,14 @@ public class FSDirectory implements Closeable {
         usersToBypassExtAttrProvider.add(tmp);
       }
     }
+  }
+
+  public INodeDirectory getRootDir() {
+    if (inodeMap != null) {
+      return inodeMap.get(rootID).asDirectory();
+    }
+    LOG.error("Inode Map Seems Null");
+    return null;
   }
 
   /**
@@ -534,7 +543,7 @@ public class FSDirectory implements Closeable {
 
   /** @return the root directory inode. */
   public INodeDirectory getRoot() {
-    return rootDir;
+    return getRootDir();
   }
 
   public BlockStoragePolicySuite getBlockStoragePolicySuite() {
@@ -678,7 +687,7 @@ public class FSDirectory implements Closeable {
       }
     }
     components = resolveComponents(components, this);
-    INodesInPath iip = INodesInPath.resolve(rootDir, components, isRaw);
+    INodesInPath iip = INodesInPath.resolve(getRootDir(), components, isRaw);
     // verify all ancestors are dirs and traversable.  note that only
     // methods that create new namespace items have the signature to throw
     // PNDE
@@ -781,7 +790,7 @@ public class FSDirectory implements Closeable {
       QuotaCounts counts = new QuotaCounts.Builder().build();
       ForkJoinPool p = new ForkJoinPool(threads);
       RecursiveAction task = new InitQuotaTask(getBlockStoragePolicySuite(),
-          rootDir.getStoragePolicyID(), rootDir, counts);
+          getRootDir().getStoragePolicyID(), getRootDir(), counts);
       p.execute(task);
       task.join();
       p.shutdown();
@@ -1279,7 +1288,7 @@ public class FSDirectory implements Closeable {
     // editlog/fsimage during upgrade since /.reserved was a valid name in older
     // release. This may also be called when a user tries to create a file
     // or directory /.reserved.
-    if (pos == 1 && existing.getINode(0) == rootDir && isReservedName(inode)) {
+    if (pos == 1 && existing.getINode(0) == getRootDir() && isReservedName(inode)) {
       throw new HadoopIllegalArgumentException(
           "File name \"" + inode.getLocalName() + "\" is reserved and cannot "
               + "be created. If this is during upgrade change the name of the "
@@ -1405,6 +1414,10 @@ public class FSDirectory implements Closeable {
     return inodeMap;
   }
 
+  public void updateInode(INode inode) {
+    inodeMap.updateInode(inode);
+  }
+
   /**
    * This method is always called with writeLock of FSDirectory held.
    */
@@ -1469,7 +1482,7 @@ public class FSDirectory implements Closeable {
    * fsimage, and should only be called during NN restart.
    */
   public final void addRootDirToEncryptionZone(XAttrFeature xaf) {
-    addEncryptionZone(rootDir, xaf);
+    addEncryptionZone(getRootDir(), xaf);
   }
 
   /**
@@ -1515,7 +1528,8 @@ public class FSDirectory implements Closeable {
   void reset() {
     writeLock();
     try {
-      rootDir = createRoot(getFSNamesystem());
+      INodeDirectory rootDir = createRoot(getFSNamesystem());
+      rootID = 0L;
       inodeMap.clear();
       addToInodeMap(rootDir);
       nameCache.reset();
@@ -1750,7 +1764,7 @@ public class FSDirectory implements Closeable {
   public INodesInPath getINodesInPath(byte[][] components, DirOp dirOp)
       throws UnresolvedLinkException, AccessControlException,
       ParentNotDirectoryException {
-    INodesInPath iip = INodesInPath.resolve(rootDir, components);
+    INodesInPath iip = INodesInPath.resolve(getRootDir(), components);
     checkTraverse(null, iip, dirOp);
     return iip;
   }

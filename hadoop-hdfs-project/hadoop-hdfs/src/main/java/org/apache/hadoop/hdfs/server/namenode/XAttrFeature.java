@@ -17,6 +17,7 @@
  */
 package org.apache.hadoop.hdfs.server.namenode;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,7 +31,7 @@ import com.google.common.collect.ImmutableList;
  * Feature for extended attributes.
  */
 @InterfaceAudience.Private
-public class XAttrFeature implements INode.Feature {
+public class XAttrFeature implements INode.Feature, Serializable {
   static final int PACK_THRESHOLD = 1024;
 
   /** The packed bytes for small size XAttrs. */

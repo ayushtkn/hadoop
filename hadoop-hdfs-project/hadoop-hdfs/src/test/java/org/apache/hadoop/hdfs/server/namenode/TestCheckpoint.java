@@ -1101,8 +1101,8 @@ public class TestCheckpoint {
       secondary.doCheckpoint();
       
       FSDirectory secondaryFsDir = secondary.getFSNamesystem().dir;
-      INode rootInMap = secondaryFsDir.getInode(secondaryFsDir.rootDir.getId());
-      assertSame(rootInMap, secondaryFsDir.rootDir);
+      INode rootInMap = secondaryFsDir.getInode(secondaryFsDir.getRootDir().getId());
+      assertSame(rootInMap, secondaryFsDir.getRootDir());
       
       fileSys.delete(tmpDir, true);
       fileSys.mkdirs(tmpDir);

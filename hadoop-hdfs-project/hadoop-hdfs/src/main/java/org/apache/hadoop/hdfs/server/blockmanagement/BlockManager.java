@@ -85,11 +85,8 @@ import org.apache.hadoop.hdfs.server.blockmanagement.NumberReplicas.StoredReplic
 import org.apache.hadoop.hdfs.server.blockmanagement.PendingDataNodeMessages.ReportedBlockInfo;
 import org.apache.hadoop.hdfs.server.common.HdfsServerConstants.BlockUCState;
 import org.apache.hadoop.hdfs.server.common.HdfsServerConstants.ReplicaState;
-import org.apache.hadoop.hdfs.server.namenode.CachedBlock;
+import org.apache.hadoop.hdfs.server.namenode.*;
 import org.apache.hadoop.hdfs.server.namenode.INode.BlocksMapUpdateInfo;
-import org.apache.hadoop.hdfs.server.namenode.INodesInPath;
-import org.apache.hadoop.hdfs.server.namenode.NameNode;
-import org.apache.hadoop.hdfs.server.namenode.Namesystem;
 import org.apache.hadoop.hdfs.server.namenode.ha.HAContext;
 import org.apache.hadoop.hdfs.server.namenode.metrics.NameNodeMetrics;
 import org.apache.hadoop.hdfs.server.namenode.sps.StoragePolicySatisfyManager;
@@ -109,7 +106,6 @@ import org.apache.hadoop.hdfs.server.protocol.StorageReport;
 import org.apache.hadoop.hdfs.server.protocol.VolumeFailureSummary;
 import org.apache.hadoop.hdfs.util.FoldedTreeSet;
 import org.apache.hadoop.hdfs.protocol.ErasureCodingPolicy;
-import org.apache.hadoop.hdfs.server.namenode.CacheManager;
 
 import static org.apache.hadoop.hdfs.util.StripedBlockUtil.getInternalBlockLength;
 
@@ -1043,6 +1039,11 @@ public class BlockManager implements BlockStatsMXBean {
     List<ReplicaUnderConstruction> staleReplicas =
         block.commitBlock(commitBlock);
     removeStaleReplicas(staleReplicas, block);
+
+    INodeFile inode = (INodeFile) namesystem.getFSDirectory().getINodeMap()
+        .get(block.getBlockCollectionId());
+    inode.replaceBlock(block);
+    namesystem.getFSDirectory().updateInode(inode);
     return true;
   }
   
@@ -1190,6 +1191,11 @@ public class BlockManager implements BlockStatsMXBean {
     List<ReplicaUnderConstruction> staleReplicas = block.commitBlock(block);
     removeStaleReplicas(staleReplicas, block);
     completeBlock(block, null, true);
+    INodeFile inode = (INodeFile) namesystem.getFSDirectory().getINodeMap()
+        .get(block.getBlockCollectionId());
+    inode.replaceBlock(block);
+    namesystem.getFSDirectory().updateInode(inode);
+
   }
 
   /**
@@ -2976,6 +2982,10 @@ public class BlockManager implements BlockStatsMXBean {
       if (reportedState == ReplicaState.FINALIZED) {
         addStoredBlockImmediate(storedBlock, iblk, storageInfo);
       }
+      INodeFile inode = (INodeFile) namesystem.getFSDirectory().getINodeMap()
+          .get(storedBlock.getBlockCollectionId());
+      inode.replaceBlock(storedBlock);
+      namesystem.getFSDirectory().updateInode(inode);
     }
   }
 
@@ -3327,12 +3337,14 @@ public class BlockManager implements BlockStatsMXBean {
    * @throws IOException
    */
   private void addStoredBlockImmediate(BlockInfo storedBlock, Block reported,
-      DatanodeStorageInfo storageInfo)
-  throws IOException {
+      DatanodeStorageInfo storageInfo) throws IOException {
     assert (storedBlock != null && namesystem.hasWriteLock());
-    if (!namesystem.isInStartupSafeMode()
-        || isPopulatingReplQueues()) {
+    if (!namesystem.isInStartupSafeMode() || isPopulatingReplQueues()) {
       addStoredBlock(storedBlock, reported, storageInfo, null, false);
+      INodeFile inode = (INodeFile) namesystem.getFSDirectory().getINodeMap()
+          .get(storedBlock.getBlockCollectionId());
+      inode.replaceBlock(storedBlock);
+      namesystem.getFSDirectory().updateInode(inode);
       return;
     }
 
@@ -3351,6 +3363,11 @@ public class BlockManager implements BlockStatsMXBean {
       // handles the safe block count maintenance.
       bmSafeMode.incrementSafeBlockCount(numCurrentReplica, storedBlock);
     }
+
+    INodeFile inode = (INodeFile) namesystem.getFSDirectory().getINodeMap()
+        .get(storedBlock.getBlockCollectionId());
+    inode.replaceBlock(storedBlock);
+    namesystem.getFSDirectory().updateInode(inode);
   }
 
   /**
@@ -3465,6 +3482,11 @@ public class BlockManager implements BlockStatsMXBean {
     if ((corruptReplicasCount > 0) && (numLiveReplicas >= fileRedundancy)) {
       invalidateCorruptReplicas(storedBlock, reportedBlock, num);
     }
+
+    INodeFile inode = (INodeFile) namesystem.getFSDirectory().getINodeMap()
+        .get(storedBlock.getBlockCollectionId());
+    inode.replaceBlock(storedBlock);
+    namesystem.getFSDirectory().updateInode(inode);
     return storedBlock;
   }
 
@@ -4090,6 +4112,10 @@ public class BlockManager implements BlockStatsMXBean {
     }
     processAndHandleReportedBlock(storageInfo, block, ReplicaState.FINALIZED,
         delHintNode);
+    INodeFile inode = (INodeFile) namesystem.getFSDirectory().getINodeMap()
+        .get(storedBlock.getBlockCollectionId());
+    inode.replaceBlock(storedBlock);
+    namesystem.getFSDirectory().updateInode(inode);
   }
   
   private void processAndHandleReportedBlock(

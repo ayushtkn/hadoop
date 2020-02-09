@@ -24,6 +24,7 @@ import org.apache.hadoop.classification.InterfaceStability;
 
 import com.google.common.annotations.VisibleForTesting;
 
+import java.io.*;
 import java.net.InetSocketAddress;
 
 /**
@@ -39,7 +40,7 @@ import java.net.InetSocketAddress;
  */
 @InterfaceAudience.Private
 @InterfaceStability.Evolving
-public class DatanodeID implements Comparable<DatanodeID> {
+public class DatanodeID implements Comparable<DatanodeID>, Serializable {
   public static final DatanodeID[] EMPTY_ARRAY = {};
   public static final DatanodeID EMPTY_DATANODE_ID = new DatanodeID("null",
       "null", "null", 0, 0, 0, 0);

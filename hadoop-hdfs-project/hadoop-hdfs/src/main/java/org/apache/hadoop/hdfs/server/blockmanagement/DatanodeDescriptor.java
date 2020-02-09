@@ -17,6 +17,7 @@
  */
 package org.apache.hadoop.hdfs.server.blockmanagement;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -63,7 +64,7 @@ import org.slf4j.LoggerFactory;
  */
 @InterfaceAudience.Private
 @InterfaceStability.Evolving
-public class DatanodeDescriptor extends DatanodeInfo {
+public class DatanodeDescriptor extends DatanodeInfo implements Serializable{
   public static final Logger LOG =
       LoggerFactory.getLogger(DatanodeDescriptor.class);
   public static final DatanodeDescriptor[] EMPTY_ARRAY = {};
@@ -72,7 +73,7 @@ public class DatanodeDescriptor extends DatanodeInfo {
   /** Block and targets pair */
   @InterfaceAudience.Private
   @InterfaceStability.Evolving
-  public static class BlockTargetPair {
+  public static class BlockTargetPair implements Serializable{
     public final Block block;
     public final DatanodeStorageInfo[] targets;    
 
@@ -83,7 +84,7 @@ public class DatanodeDescriptor extends DatanodeInfo {
   }
 
   /** A BlockTargetPair queue. */
-  private static class BlockQueue<E> {
+  private static class BlockQueue<E> implements Serializable {
     private final Queue<E> blockq = new LinkedList<>();
 
     /** Size of the queue */
@@ -122,7 +123,8 @@ public class DatanodeDescriptor extends DatanodeInfo {
   /**
    * A list of CachedBlock objects on this datanode.
    */
-  public static class CachedBlocksList extends IntrusiveCollection<CachedBlock> {
+  public static class CachedBlocksList extends IntrusiveCollection<CachedBlock>
+      implements Serializable{
     public enum Type {
       PENDING_CACHED,
       CACHED,
@@ -570,7 +572,7 @@ public class DatanodeDescriptor extends DatanodeInfo {
     }
   }
 
-  private static class BlockIterator implements Iterator<BlockInfo> {
+  private static class BlockIterator implements Iterator<BlockInfo>, Serializable {
     private int index = 0;
     private final List<Iterator<BlockInfo>> iterators;
     
@@ -839,7 +841,7 @@ public class DatanodeDescriptor extends DatanodeInfo {
   }
 
   /** Leaving service status. */
-  public class LeavingServiceStatus {
+  public class LeavingServiceStatus implements Serializable {
     private int underReplicatedBlocks;
     private int underReplicatedBlocksInOpenFiles;
     private int outOfServiceOnlyReplicas;

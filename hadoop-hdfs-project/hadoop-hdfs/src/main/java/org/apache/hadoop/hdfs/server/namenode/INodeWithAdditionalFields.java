@@ -26,13 +26,15 @@ import org.apache.hadoop.util.LightWeightGSet.LinkedElement;
 
 import com.google.common.base.Preconditions;
 
+import java.io.*;
+
 /**
  * {@link INode} with additional fields including id, name, permission,
  * access time and modification time.
  */
 @InterfaceAudience.Private
 public abstract class INodeWithAdditionalFields extends INode
-    implements LinkedElement {
+    implements LinkedElement, Serializable {
   // Note: this format is used both in-memory and on-disk.  Changes will be
   // incompatible.
   enum PermissionStatusFormat implements LongBitFormat.Enum {

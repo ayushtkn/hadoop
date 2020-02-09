@@ -17,6 +17,7 @@
  */
 package org.apache.hadoop.hdfs.server.blockmanagement;
 
+import java.io.*;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
@@ -36,7 +37,7 @@ import com.google.common.annotations.VisibleForTesting;
  * A Datanode has one or more storages. A storage in the Datanode is represented
  * by this class.
  */
-public class DatanodeStorageInfo {
+public class DatanodeStorageInfo implements Serializable {
   public static final DatanodeStorageInfo[] EMPTY_ARRAY = {};
 
   public static DatanodeInfo[] toDatanodeInfos(

@@ -17,8 +17,10 @@
  */
 package org.apache.hadoop.hdfs.server.namenode;
 
+import java.io.*;
 import java.util.Iterator;
 
+import net.openhft.chronicle.map.*;
 import org.apache.hadoop.fs.permission.FsPermission;
 import org.apache.hadoop.fs.permission.PermissionStatus;
 import org.apache.hadoop.hdfs.protocol.HdfsConstants;
@@ -32,25 +34,43 @@ import com.google.common.base.Preconditions;
  * Storing all the {@link INode}s and maintaining the mapping between INode ID
  * and INode.  
  */
-public class INodeMap {
-  
+public class INodeMap implements Serializable {
+
   static INodeMap newInstance(INodeDirectory rootDir) {
     // Compute the map capacity by allocating 1% of total memory
-    int capacity = LightWeightGSet.computeCapacity(1, "INodeMap");
-    GSet<INode, INodeWithAdditionalFields> map =
-        new LightWeightGSet<>(capacity);
-    map.put(rootDir);
+    //    int capacity = LightWeightGSet.computeCapacity(1, "INodeMap");
+
+    ChronicleMapBuilder<INode, INodeWithAdditionalFields> builder =
+        ChronicleMapBuilder
+            .simpleMapOf(INode.class, INodeWithAdditionalFields.class)
+            .entries(1024);
+    File file = new File(
+        "/home/ayush/hadoop/trunk/ayushMap" + System.currentTimeMillis()
+            + ".map");
+    file.deleteOnExit();
+    ChronicleMap<INode, INodeWithAdditionalFields> map = null;
+    try {
+      map = builder.createPersistedTo(file);
+    } catch (IOException e) {
+      // Ignore as of now, Will think later, if worth!!!
+    }
+    map.put(rootDir, rootDir);
     return new INodeMap(map);
   }
 
-  /** Synchronized by external lock. */
-  private final GSet<INode, INodeWithAdditionalFields> map;
-  
-  public Iterator<INodeWithAdditionalFields> getMapIterator() {
-    return map.iterator();
+  public void updateInode(INode inode) {
+    remove(inode);
+    put(inode);
   }
 
-  private INodeMap(GSet<INode, INodeWithAdditionalFields> map) {
+  /** Synchronized by external lock. */
+  private final ChronicleMap<INode, INodeWithAdditionalFields> map;
+
+  public Iterator<INodeWithAdditionalFields> getMapIterator() {
+    return map.values().iterator();
+  }
+
+  private INodeMap(ChronicleMap<INode, INodeWithAdditionalFields> map) {
     Preconditions.checkArgument(map != null);
     this.map = map;
   }
@@ -62,7 +82,7 @@ public class INodeMap {
    */
   public final void put(INode inode) {
     if (inode instanceof INodeWithAdditionalFields) {
-      map.put((INodeWithAdditionalFields)inode);
+      map.put(inode, (INodeWithAdditionalFields)inode);
     }
   }
   
@@ -71,6 +91,13 @@ public class INodeMap {
    * @param inode The {@link INode} to be removed.
    */
   public final void remove(INode inode) {
+    Iterator<INode> itr = map.keySet().iterator();
+    while (itr.hasNext()) {
+      INode in = itr.next();
+      if (in.getId() == inode.getId()) {
+        map.remove(in);
+      }
+    }
     map.remove(inode);
   }
   
@@ -128,8 +155,14 @@ public class INodeMap {
         return HdfsConstants.BLOCK_STORAGE_POLICY_ID_UNSPECIFIED;
       }
     };
-      
-    return map.get(inode);
+    Iterator<INodeWithAdditionalFields> itr = map.values().iterator();
+    while (itr.hasNext()) {
+      INodeWithAdditionalFields in = itr.next();
+      if (in.getId() == inode.getId()) {
+        return in;
+      }
+    }
+    return null;
   }
   
   /**
@@ -139,3 +172,5 @@ public class INodeMap {
     map.clear();
   }
 }
+
+

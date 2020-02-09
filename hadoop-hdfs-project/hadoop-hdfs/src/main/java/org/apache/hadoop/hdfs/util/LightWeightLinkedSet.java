@@ -17,6 +17,7 @@
  */
 package org.apache.hadoop.hdfs.util;
 
+import java.io.*;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.ArrayList;
@@ -32,11 +33,13 @@ import java.util.NoSuchElementException;
  * This class is not thread safe.
  *
  */
-public class LightWeightLinkedSet<T> extends LightWeightHashSet<T> {
+public class LightWeightLinkedSet<T> extends LightWeightHashSet<T> implements
+    Serializable {
   /**
    * Elements of {@link LightWeightLinkedSet}.
    */
-  static class DoubleLinkedElement<T> extends LinkedElement<T> {
+  static class DoubleLinkedElement<T> extends LinkedElement<T>
+      implements Serializable {
     // references to elements within all-element linked list
     private DoubleLinkedElement<T> before;
     private DoubleLinkedElement<T> after;
@@ -236,7 +239,7 @@ public class LightWeightLinkedSet<T> extends LightWeightHashSet<T> {
     return new LinkedSetIterator();
   }
 
-  private class LinkedSetIterator implements Iterator<T> {
+  private class LinkedSetIterator implements Iterator<T>,Serializable {
     /** The starting modification for fail-fast. */
     private final int startModification = modification;
     /** The next element to return. */

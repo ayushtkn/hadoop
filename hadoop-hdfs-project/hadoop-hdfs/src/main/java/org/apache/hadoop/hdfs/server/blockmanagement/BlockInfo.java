@@ -17,7 +17,7 @@
  */
 package org.apache.hadoop.hdfs.server.blockmanagement;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -40,7 +40,7 @@ import static org.apache.hadoop.hdfs.server.namenode.INodeId.INVALID_INODE_ID;
  */
 @InterfaceAudience.Private
 public abstract class BlockInfo extends Block
-    implements LightWeightGSet.LinkedElement {
+    implements LightWeightGSet.LinkedElement, Serializable {
 
   public static final BlockInfo[] EMPTY_ARRAY = {};
 
