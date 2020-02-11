@@ -584,6 +584,7 @@ class BPOfferService {
           LOG.warn("NN " + actor + " tried to claim ACTIVE state at txid=" +
               txid + " but there was already a more recent claim at txid=" +
               lastActiveClaimTxId);
+          actor.getScheduler().setIsSkipBlockReport(false);
           return;
         } else {
           if (bpServiceToActive == null) {
@@ -594,10 +595,12 @@ class BPOfferService {
           }
           bpServiceToActive = actor;
         }
+        actor.getScheduler().setIsSkipBlockReport(false);
       } else if (!nnClaimsActive && bposThinksActive) {
         LOG.info("Namenode " + actor + " relinquishing ACTIVE state with " +
             "txid=" + nnHaState.getTxId());
         bpServiceToActive = null;
+        actor.getScheduler().setIsSkipBlockReport(false);
       }
 
       if (bpServiceToActive == actor) {

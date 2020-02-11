@@ -894,6 +894,8 @@ public class DFSConfigKeys extends CommonConfigurationKeys {
   public static final int     DFS_BLOCKREPORT_INITIAL_DELAY_DEFAULT = 0;
   public static final String  DFS_BLOCKREPORT_SPLIT_THRESHOLD_KEY = "dfs.blockreport.split.threshold";
   public static final long    DFS_BLOCKREPORT_SPLIT_THRESHOLD_DEFAULT = 1000 * 1000;
+  public static final String  DFS_BLOCKREPORT_SKIP_ENABLED_KEY = "dfs.blockreport.skip.enabled";
+  public static final boolean DFS_BLOCKREPORT_SKIP_ENABLED_DEFAULT = true;
   public static final String  DFS_NAMENODE_MAX_FULL_BLOCK_REPORT_LEASES = "dfs.namenode.max.full.block.report.leases";
   public static final int     DFS_NAMENODE_MAX_FULL_BLOCK_REPORT_LEASES_DEFAULT = 6;
   public static final String  DFS_NAMENODE_FULL_BLOCK_REPORT_LEASE_LENGTH_MS = "dfs.namenode.full.block.report.lease.length.ms";

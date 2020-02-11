@@ -138,7 +138,7 @@ class BPServiceActor implements Runnable {
     fullBlockReportLeaseId = 0;
     scheduler = new Scheduler(dnConf.heartBeatInterval,
         dnConf.getLifelineIntervalMs(), dnConf.blockReportInterval,
-        dnConf.outliersReportIntervalMs);
+        dnConf.outliersReportIntervalMs, dnConf.isSkipBREnabled);
     // get the value of maxDataLength.
     this.maxDataLength = dnConf.getMaxDataLength();
     if (serviceId != null) {
@@ -364,6 +364,12 @@ class BPServiceActor implements Runnable {
   List<DatanodeCommand> blockReport(long fullBrLeaseId) throws IOException {
     final ArrayList<DatanodeCommand> cmds = new ArrayList<DatanodeCommand>();
 
+    // Check whether the regular block report can be skipped.
+    if (scheduler.shouldSkipBR()) {
+      scheduler.scheduleNextBlockReport();
+      return null;
+    }
+
     // Flush any block information that precedes the block report. Otherwise
     // we have a chance that we will miss the delHint information
     // or we will report an RBW replica after the BlockReport already reports
@@ -448,6 +454,9 @@ class BPServiceActor implements Runnable {
               ((nCmds == 1) ? "one command: " + cmds.get(0) :
                   (nCmds + " commands: " + Joiner.on("; ").join(cmds)))) +
           ".");
+    }
+    if (success) {
+      scheduler.setIsSkipBlockReport(true);
     }
     scheduler.updateLastBlockReportTime(monotonicNow());
     scheduler.scheduleNextBlockReport();
@@ -754,6 +763,7 @@ class BPServiceActor implements Runnable {
           return;
         }
         LOG.warn("RemoteException in offerService", re);
+        scheduler.setIsSkipBlockReport(false);
         sleepAfterException();
       } catch (IOException e) {
         LOG.warn("IOException in offerService", e);
@@ -826,7 +836,7 @@ class BPServiceActor implements Runnable {
     // reset lease id whenever registered to NN.
     // ask for a new lease id at the next heartbeat.
     fullBlockReportLeaseId = 0;
-
+    scheduler.setIsSkipBlockReport(false);
     // random short delay - helps scatter the BR from all DNs
     scheduler.scheduleBlockReport(dnConf.initialBlockReportDelayMs);
   }
@@ -1135,6 +1145,10 @@ class BPServiceActor implements Runnable {
     @VisibleForTesting
     volatile long nextOutliersReportTime = monotonicNow();
 
+    private volatile boolean isSkipBREnabled;
+
+    private volatile boolean isSkipBR = false;
+
     private final AtomicBoolean forceFullBlockReport =
         new AtomicBoolean(false);
 
@@ -1144,12 +1158,22 @@ class BPServiceActor implements Runnable {
     private final long outliersReportIntervalMs;
 
     Scheduler(long heartbeatIntervalMs, long lifelineIntervalMs,
-              long blockReportIntervalMs, long outliersReportIntervalMs) {
+        long blockReportIntervalMs, long outliersReportIntervalMs,
+        boolean isSkipBREnabled) {
       this.heartbeatIntervalMs = heartbeatIntervalMs;
       this.lifelineIntervalMs = lifelineIntervalMs;
       this.blockReportIntervalMs = blockReportIntervalMs;
       this.outliersReportIntervalMs = outliersReportIntervalMs;
       scheduleNextLifeline(nextHeartbeatTime);
+      this.isSkipBREnabled = isSkipBREnabled; // TODO: Get From Constructor.
+    }
+
+    public void setIsSkipBlockReport(boolean val) {
+      this.isSkipBR = isSkipBREnabled && val && !resetBlockReportTime;
+    }
+    
+    public boolean shouldSkipBR() {
+      return this.isSkipBR && !resetBlockReportTime;
     }
 
     // This is useful to make sure NN gets Heartbeat before Blockreport
@@ -1218,6 +1242,12 @@ class BPServiceActor implements Runnable {
     void forceFullBlockReportNow() {
       forceFullBlockReport.set(true);
       resetBlockReportTime = true;
+      isSkipBR = false;
+    }
+
+    @VisibleForTesting
+    void setNextBlockReportTime(long time) {
+      this.nextBlockReportTime = time;
     }
 
     /**

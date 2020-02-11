@@ -28,6 +28,7 @@ import org.apache.hadoop.hdfs.server.protocol.SlowDiskReports;
 import static org.apache.hadoop.test.MetricsAsserts.getLongCounter;
 import static org.apache.hadoop.test.MetricsAsserts.getMetrics;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
@@ -232,29 +233,37 @@ public class TestBPOfferService {
    */
   @Test
   public void testBasicFunctionality() throws Exception {
-    BPOfferService bpos = setupBPOSForNNs(mockNN1, mockNN2);
+    BPOfferService bpos = setupBPOSForNNs(mockNN1);
     bpos.start();
     try {
-      waitForBothActors(bpos);
+      waitForBothActors(bpos, 1);
       
       // The DN should have register to both NNs.
       Mockito.verify(mockNN1).registerDatanode(Mockito.any());
-      Mockito.verify(mockNN2).registerDatanode(Mockito.any());
 
       // Should get block reports from both NNs
       waitForBlockReport(mockNN1);
-      waitForBlockReport(mockNN2);
+
+      // Post registration there should be one more block report sent after
+      // first block report
+      assertFalse(
+          bpos.getBPServiceActors().get(0).getScheduler().shouldSkipBR());
+
+      bpos.getBPServiceActors().get(0).getScheduler().setNextBlockReportTime(0);
+
+
+      assertTrue(
+          bpos.getBPServiceActors().get(0).getScheduler().shouldSkipBR());
+
+
+      // This is called as part of handleDiskError, Ensure BlockReport is
+      // send in this case.
+      bpos.scheduleBlockReport(0);
+
+      waitForBlockReport(mockNN1);
 
       // When we receive a block, it should report it to both NNs
-      bpos.notifyNamenodeReceivedBlock(FAKE_BLOCK, null, "", false);
 
-      ReceivedDeletedBlockInfo[] ret = waitForBlockReceived(FAKE_BLOCK, mockNN1);
-      assertEquals(1, ret.length);
-      assertEquals(FAKE_BLOCK.getLocalBlock(), ret[0].getBlock());
-      
-      ret = waitForBlockReceived(FAKE_BLOCK, mockNN2);
-      assertEquals(1, ret.length);
-      assertEquals(FAKE_BLOCK.getLocalBlock(), ret[0].getBlock());
 
     } finally {
       bpos.stop();
@@ -494,14 +503,14 @@ public class TestBPOfferService {
     }, 100, 10000);
   }
 
-  private void waitForBothActors(final BPOfferService bpos)
+  private void waitForBothActors(final BPOfferService bpos, int num)
       throws Exception {
     GenericTestUtils.waitFor(new Supplier<Boolean>() {
       @Override
       public Boolean get() {
         List<BPServiceActor> actors = bpos.getBPServiceActors();
 
-        return bpos.isAlive() && getRegisteredActors(actors) == 2;
+        return bpos.isAlive() && getRegisteredActors(actors) == num;
       }
       private int getRegisteredActors(List<BPServiceActor> actors) {
         int regActors = 0;
@@ -512,7 +521,7 @@ public class TestBPOfferService {
         }
         return regActors;
       }
-    }, 100, 10000);
+    }, 100, 1000000);
   }
   
   private void waitForBlockReport(final DatanodeProtocolClientSideTranslatorPB mockNN)
@@ -532,7 +541,7 @@ public class TestBPOfferService {
           return false;
         }
       }
-    }, 500, 10000);
+    }, 500, 10000000);
   }
 
   private void waitForBlockReport(
@@ -558,7 +567,7 @@ public class TestBPOfferService {
           return false;
         }
       }
-    }, 500, 10000);
+    }, 500, 1000000);
   }
 
   private void waitForRegistration(
@@ -924,7 +933,7 @@ public class TestBPOfferService {
 
     bpos.start();
     try {
-      waitForBothActors(bpos);
+      waitForBothActors(bpos,2);
 
       // The DN should have register to both NNs.
       Mockito.verify(mockNN1)

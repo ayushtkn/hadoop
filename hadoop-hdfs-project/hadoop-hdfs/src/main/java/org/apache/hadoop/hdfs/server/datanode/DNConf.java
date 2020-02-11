@@ -109,6 +109,7 @@ public class DNConf {
   final long initialBlockReportDelayMs;
   final long cacheReportInterval;
   final long datanodeSlowIoWarningThresholdMs;
+  final boolean isSkipBREnabled;
 
   final String minimumNameNodeVersion;
   final String encryptionAlgorithm;
@@ -150,6 +151,9 @@ public class DNConf {
     this.tcpNoDelay = getConf().getBoolean(
         DFSConfigKeys.DFS_DATA_TRANSFER_SERVER_TCPNODELAY,
         DFSConfigKeys.DFS_DATA_TRANSFER_SERVER_TCPNODELAY_DEFAULT);
+    this.isSkipBREnabled =
+        getConf().getBoolean(DFSConfigKeys.DFS_BLOCKREPORT_SKIP_ENABLED_KEY,
+            DFSConfigKeys.DFS_BLOCKREPORT_SKIP_ENABLED_DEFAULT);
 
     /* Based on results on different platforms, we might need set the default
      * to false on some of them. */
