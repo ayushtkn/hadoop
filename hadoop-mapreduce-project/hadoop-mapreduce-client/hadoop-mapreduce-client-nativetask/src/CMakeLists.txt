@@ -30,6 +30,8 @@ hadoop_add_compiler_flags("-DNDEBUG -DSIMPLE_MEMCPY -fno-strict-aliasing -fsigne
 
 # Source location.
 set(SRC main/native)
+unset(GENERATED_JAVAH)
+unset(JVM_ARCH_DATA_MODEL)
 
 # The caller must specify where the generated headers have been placed.
 if(NOT GENERATED_JAVAH)
@@ -57,6 +59,34 @@ check_function_exists(localtime_r HAVE_LOCALTIME_R)
 check_function_exists(memset HAVE_MEMSET)
 check_function_exists(strchr HAVE_STRCHR)
 check_function_exists(strtoul HAVE_STRTOUL)
+
+
+# Require zstandard
+SET(STORED_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
+hadoop_set_find_shared_library_version("1")
+find_library(ZSTD_LIBRARY
+        NAMES zstd
+        PATHS ${CUSTOM_ZSTD_PREFIX} ${CUSTOM_ZSTD_PREFIX}/lib
+        ${CUSTOM_ZSTD_PREFIX}/lib64 ${CUSTOM_ZSTD_LIB})
+SET(CMAKE_FIND_LIBRARY_SUFFIXES ${STORED_CMAKE_FIND_LIBRARY_SUFFIXES})
+find_path(ZSTD_INCLUDE_DIR
+        NAMES zstd.h
+        PATHS ${CUSTOM_ZSTD_PREFIX} ${CUSTOM_ZSTD_PREFIX}/include
+        ${CUSTOM_ZSTD_INCLUDE})
+if (ZSTD_LIBRARY AND ZSTD_INCLUDE_DIR)
+    GET_FILENAME_COMPONENT(HADOOP_ZSTD_LIBRARY ${ZSTD_LIBRARY} NAME)
+    set(ZSTD_SOURCE_FILES
+            "${SRC}/src/codec/ZStandardCodec.cc")
+    set(REQUIRE_ZSTD ${REQUIRE_ZSTD}) # Stop warning about unused variable.
+    message(STATUS "Found ZStandard: ${ZSTD_LIBRARY}")
+else ()
+    set(ZSTD_INCLUDE_DIR "")
+    set(ZSTD_SOURCE_FILES "")
+    IF(REQUIRE_ZSTD)
+        MESSAGE(FATAL_ERROR "Required zstandard library could not be found.  ZSTD_LIBRARY=${ZSTD_LIBRARY}, ZSTD_INCLUDE_DIR=${ZSTD_INCLUDE_DIR}, CUSTOM_ZSTD_INCLUDE_DIR=${CUSTOM_ZSTD_INCLUDE_DIR}, CUSTOM_ZSTD_PREFIX=${CUSTOM_ZSTD_PREFIX}, CUSTOM_ZSTD_INCLUDE=${CUSTOM_ZSTD_INCLUDE}")
+    ENDIF(REQUIRE_ZSTD)
+endif ()
+
 
 # Require snappy.
 set(STORED_CMAKE_FIND_LIBRARY_SUFFIXES CMAKE_FIND_LIBRARY_SUFFIXES)
@@ -108,10 +138,10 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 if(CMAKE_SYSTEM_NAME MATCHES "Darwin")
     # macosx does not have -lrt
-    set(NT_DEPEND_LIBRARY dl pthread z ${SNAPPY_LIBRARY} ${JAVA_JVM_LIBRARY})
+    set(NT_DEPEND_LIBRARY dl pthread z ${SNAPPY_LIBRARY} ${JAVA_JVM_LIBRARY} ${ZSTD_LIBRARY})
     set(SYSTEM_MAC TRUE)
 else()
-    set(NT_DEPEND_LIBRARY dl rt pthread z ${SNAPPY_LIBRARY} ${JAVA_JVM_LIBRARY})
+    set(NT_DEPEND_LIBRARY dl rt pthread z ${SNAPPY_LIBRARY} ${JAVA_JVM_LIBRARY} ${ZSTD_LIBRARY})
     set(SYSTEM_MAC FALSE)
 endif()
 
@@ -122,6 +152,7 @@ hadoop_add_dual_library(nativetask
     ${SRC}/src/codec/BlockCodec.cc
     ${SRC}/src/codec/GzipCodec.cc
     ${SRC}/src/codec/Lz4Codec.cc
+    ${SRC}/src/codec/ZStandardCodec.cc
     ${SNAPPY_SOURCE_FILES}
     ${SRC}/src/handler/BatchHandler.cc
     ${SRC}/src/handler/MCollectorOutputHandler.cc

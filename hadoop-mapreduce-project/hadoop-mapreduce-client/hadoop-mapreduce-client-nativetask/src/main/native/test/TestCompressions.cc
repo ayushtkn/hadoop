@@ -284,3 +284,9 @@ TEST(Perf, SnappyCodec) {
 }
 
 #endif // define HADOOP_SNAPPY_LIBRARY
+#if defined HADOOP_ZSTD_LIBRARY
+
+TEST(Perf, ZStandardCodec) {
+  TestCodec("org.apache.hadoop.io.compress.ZStandardCodec");
+}
+#endif
