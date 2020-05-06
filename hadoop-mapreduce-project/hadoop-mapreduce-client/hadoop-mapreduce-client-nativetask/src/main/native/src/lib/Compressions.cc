@@ -22,6 +22,7 @@
 #include "util/SyncUtils.h"
 #include "codec/GzipCodec.h"
 #include "codec/SnappyCodec.h"
+#include "codec/ZStandardCodec.h"
 #include "codec/Lz4Codec.h"
 
 namespace NativeTask {
@@ -51,6 +52,9 @@ const Compressions::Codec Compressions::SnappyCodec = Compressions::Codec(
 const Compressions::Codec Compressions::Lz4Codec = Compressions::Codec(
     "org.apache.hadoop.io.compress.Lz4Codec", ".lz4");
 
+const Compressions::Codec Compressions::ZStandardCodec = Compressions::Codec(
+    "org.apache.hadoop.io.compress.ZStandardCodec", ".zstandard");
+
 vector<Compressions::Codec> Compressions::SupportedCodecs = vector<Compressions::Codec>();
 
 void Compressions::initCodecs() {
@@ -60,6 +64,7 @@ void Compressions::initCodecs() {
     SupportedCodecs.push_back(GzipCodec);
     SupportedCodecs.push_back(SnappyCodec);
     SupportedCodecs.push_back(Lz4Codec);
+    SupportedCodecs.push_back(ZStandardCodec);
   }
 }
 
@@ -120,6 +125,9 @@ CompressStream * Compressions::getCompressionStream(const string & codec, Output
   if (codec == Lz4Codec.name) {
     return new Lz4CompressStream(stream, bufferSizeHint);
   }
+    if (codec == ZStandardCodec.name) {
+      return new ZStandardCompressStream(stream, bufferSizeHint);
+    }
   return NULL;
 }
 
@@ -138,6 +146,9 @@ DecompressStream * Compressions::getDecompressionStream(const string & codec, In
   if (codec == Lz4Codec.name) {
     return new Lz4DecompressStream(stream, bufferSizeHint);
   }
+    if (codec == ZStandardCodec.name) {
+      return new ZStandardDecompressStream(stream, bufferSizeHint);
+    }
   return NULL;
 }
 

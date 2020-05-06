@@ -48,7 +48,14 @@ JNIEXPORT jboolean JNICALL Java_org_apache_hadoop_mapred_nativetask_NativeRuntim
 #else
     return JNI_FALSE;
 #endif
-  } else {
+  } else if ("org.apache.hadoop.io.compress.ZStandardCodec" == codecString) {
+#if defined HADOOP_ZSTD_LIBRARY
+    return JNI_TRUE;
+#else
+    return JNI_FALSE;
+#endif
+  }
+  else {
     return JNI_FALSE;
   }
 }

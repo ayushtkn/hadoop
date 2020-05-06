@@ -86,6 +86,7 @@ public:
   static const Codec GzipCodec;
   static const Codec SnappyCodec;
   static const Codec Lz4Codec;
+  static const Codec ZStandardCodec;
 
 public:
   static bool support(const string & codec);

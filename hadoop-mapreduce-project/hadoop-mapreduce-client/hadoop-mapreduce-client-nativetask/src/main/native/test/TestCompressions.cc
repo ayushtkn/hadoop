@@ -57,6 +57,7 @@ void TestCodec(const string & codec) {
     compressor->write(data.c_str() + i, std::min(data.length() - i, (size_t)(128 * 1024)));
   }
   compressor->flush();
+  compressor->finish();
   LOG("%s",
       timer.getSpeedM2("compress origin/compressed", data.length(), outputBuffer.tell()).c_str());
 
@@ -284,3 +285,9 @@ TEST(Perf, SnappyCodec) {
 }
 
 #endif // define HADOOP_SNAPPY_LIBRARY
+#if defined HADOOP_ZSTD_LIBRARY
+
+TEST(Perf, ZStandardCodec) {
+  TestCodec("org.apache.hadoop.io.compress.ZStandardCodec");
+}
+#endif
