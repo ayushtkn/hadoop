@@ -84,11 +84,6 @@ https://maven.apache.org/xsd/maven-4.0.0.xsd">
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-server</artifactId>
       <scope>compile</scope>
@@ -168,6 +163,11 @@ https://maven.apache.org/xsd/maven-4.0.0.xsd">
       <artifactId>bcprov-jdk15on</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.apache.hadoop.thirdparty</groupId>
+      <artifactId>hadoop-shaded-guava</artifactId>
+      <scope>compile</scope>
+    </dependency>
   </dependencies>
 
   <profiles>
@@ -205,6 +205,24 @@ https://maven.apache.org/xsd/maven-4.0.0.xsd">
                   <descriptors>
                     <descriptor>../../hadoop-assemblies/src/main/resources/assemblies/hadoop-hdfs-nfs-dist.xml</descriptor>
                   </descriptors>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>com.google.code.maven-replacer-plugin</groupId>
+            <artifactId>replacer</artifactId>
+            <executions>
+              <execution>
+                <id>replace-sources</id>
+                <configuration>
+                  <skip>false</skip>
+                </configuration>
+              </execution>
+              <execution>
+                <id>replace-test-sources</id>
+                <configuration>
+                  <skip>false</skip>
                 </configuration>
               </execution>
             </executions>

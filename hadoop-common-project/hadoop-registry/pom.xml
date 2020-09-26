@@ -126,13 +126,13 @@
     </dependency>
 
     <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
+      <groupId>dnsjava</groupId>
+      <artifactId>dnsjava</artifactId>
     </dependency>
 
     <dependency>
-      <groupId>dnsjava</groupId>
-      <artifactId>dnsjava</artifactId>
+      <groupId>org.apache.hadoop.thirdparty</groupId>
+      <artifactId>hadoop-shaded-guava</artifactId>
     </dependency>
 
   </dependencies>
@@ -298,6 +298,24 @@
                   <descriptors>
                     <descriptor>../../hadoop-assemblies/src/main/resources/assemblies/hadoop-registry-dist.xml</descriptor>
                   </descriptors>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>com.google.code.maven-replacer-plugin</groupId>
+            <artifactId>replacer</artifactId>
+            <executions>
+              <execution>
+                <id>replace-sources</id>
+                <configuration>
+                  <skip>false</skip>
+                </configuration>
+              </execution>
+              <execution>
+                <id>replace-test-sources</id>
+                <configuration>
+                  <skip>false</skip>
                 </configuration>
               </execution>
             </executions>

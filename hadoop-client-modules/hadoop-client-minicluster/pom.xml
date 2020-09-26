@@ -673,6 +673,7 @@
                       <!-- We need a filter that matches just those things that are included in the above artiacts -->
                       <!-- Leave bouncycastle unshaded because it's signed with a special Oracle certificate so it can be a custom JCE security provider -->
                       <exclude>org.bouncycastle:*</exclude>
+                      <exclude>org.apache.hadoop.thirdparty:*</exclude>
                     </excludes>
                   </artifactSet>
                   <filters>
