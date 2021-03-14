@@ -55,6 +55,7 @@ import org.junit.rules.Timeout;
 /**
  * A JUnit test for copying files recursively.
  */
+// Test
 
 public class TestDistCpSystem {
   private static final Logger LOG =
