@@ -144,7 +144,7 @@ import java.util.function.Supplier;
 import org.apache.hadoop.thirdparty.com.google.common.collect.Maps;
 
 /**
- * The the RPC interface of the {@link Router} implemented by
+ * The RPC interface of the {@link Router} implemented by
  * {@link RouterRpcServer}.
  * Tests covering the functionality of RouterRPCServer with
  * multi nameServices.
