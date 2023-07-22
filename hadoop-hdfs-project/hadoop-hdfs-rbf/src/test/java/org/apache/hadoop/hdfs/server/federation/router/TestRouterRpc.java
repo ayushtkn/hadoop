@@ -151,7 +151,7 @@ import org.apache.hadoop.thirdparty.com.google.common.collect.Maps;
  * The the RPC interface of the {@link Router} implemented by
  * {@link RouterRpcServer}.
  * Tests covering the functionality of RouterRPCServer with
- * multi nameServices.
+ * multi nameServices.  a
  */
 public class TestRouterRpc {
 
