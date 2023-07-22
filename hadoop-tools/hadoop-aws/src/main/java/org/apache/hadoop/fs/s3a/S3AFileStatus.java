@@ -24,7 +24,7 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 
 /**
- * File status for an S3A "file".
+ * File status for an S3A "file".1
  * Modification time is trouble, see {@link #getModificationTime()}.
  *
  * The subclass is private as it should not be created directly.
