@@ -27,9 +27,6 @@ jobs:
       contents: read
       pull-requests: write
     steps:
-      - run: |
-          echo ${{ github.workspace }}
-          echo $GITHUB_WORKSPACE
       - uses: actions/labeler@v4.3.0
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
