@@ -1381,6 +1381,7 @@
         <groupId>com.google.protobuf</groupId>
         <artifactId>protobuf-java</artifactId>
         <version>${protobuf.version}</version>
+        <scope>${transient.protobuf2.scope}</scope>
       </dependency>
       <dependency>
         <groupId>commons-daemon</groupId>
