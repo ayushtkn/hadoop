@@ -22,6 +22,9 @@ import java.io.IOException;
 import java.util.Set;
 
 import javax.annotation.Nullable;
+import javax.inject.Named;
+import javax.inject.Singleton;
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.DefaultValue;
@@ -80,22 +83,26 @@ import org.apache.hadoop.yarn.webapp.NotFoundException;
 import org.apache.hadoop.yarn.webapp.WebApp;
 
 import org.apache.hadoop.classification.VisibleForTesting;
-import com.google.inject.Inject;
 
+@Singleton
 @Path("/ws/v1/history")
 public class HsWebServices extends WebServices {
   private final HistoryContext ctx;
   private WebApp webapp;
   private LogServlet logServlet;
 
-  private @Context HttpServletResponse response;
-  @Context UriInfo uriInfo;
+  @Context
+  private HttpServletResponse response;
+
+  @Context
+  private UriInfo uriInfo;
 
   @Inject
-  public HsWebServices(final HistoryContext ctx,
-      final Configuration conf,
-      final WebApp webapp,
-      @Nullable ApplicationClientProtocol appBaseProto) {
+  public HsWebServices(
+      final @Named("ctx") HistoryContext ctx,
+      final @Named("conf") Configuration conf,
+      final @Named("hsWebApp") WebApp webapp,
+      final @Named("appClient") @Nullable ApplicationClientProtocol appBaseProto) {
     super(appBaseProto);
     this.ctx = ctx;
     this.webapp = webapp;

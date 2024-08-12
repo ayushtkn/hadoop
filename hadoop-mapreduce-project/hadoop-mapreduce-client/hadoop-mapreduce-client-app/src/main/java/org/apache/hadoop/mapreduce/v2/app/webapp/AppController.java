@@ -72,10 +72,15 @@ public class AppController extends Controller implements AMParams {
     this(app, conf, ctx, "am");
   }
 
+  public void jobsBlock() {
+    render(JobsBlock.class);
+  }
+
   /**
    * Render the default(index.html) page for the Application Controller
    */
-  @Override public void index() {
+  @Override
+  public void index() {
     setTitle(join("MapReduce Application ", $(APP_ID)));
   }
 

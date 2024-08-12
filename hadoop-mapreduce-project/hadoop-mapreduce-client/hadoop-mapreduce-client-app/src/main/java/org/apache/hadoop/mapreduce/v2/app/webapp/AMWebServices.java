@@ -23,16 +23,12 @@ import java.lang.reflect.UndeclaredThrowableException;
 import java.security.AccessControlException;
 import java.security.PrivilegedExceptionAction;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -79,18 +75,20 @@ import org.apache.hadoop.yarn.webapp.BadRequestException;
 import org.apache.hadoop.yarn.webapp.NotFoundException;
 
 import org.apache.hadoop.util.Preconditions;
-import com.google.inject.Inject;
 
+
+@Singleton
 @Path("/ws/v1/mapreduce")
 public class AMWebServices {
   private final AppContext appCtx;
   private final App app;
   private final MRClientService service;
 
-  private @Context HttpServletResponse response;
+  @Context
+  private HttpServletResponse response;
   
   @Inject
-  public AMWebServices(final App app, final AppContext context) {
+  public AMWebServices(final @Named("app") App app, final @Named("am") AppContext context) {
     this.appCtx = context;
     this.app = app;
     this.service = new MRClientService(context);

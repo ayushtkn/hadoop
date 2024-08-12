@@ -112,6 +112,7 @@ function check_ci_run() {
 
 ## @description  Run the CI using YETUS
 function run_ci() {
+  set -v;
   TESTPATCHBIN="${WORKSPACE}/${YETUS}/precommit/src/main/shell/test-patch.sh"
 
   if [[ "$IS_WINDOWS" && "$IS_WINDOWS" == 1 ]]; then
@@ -180,7 +181,7 @@ function run_ci() {
   # set relatively high limits for ASF machines
   # changing these to higher values may cause problems
   # with other jobs on systemd-enabled machines
-  YETUS_ARGS+=("--proclimit=5500")
+  YETUS_ARGS+=("--proclimit=6000")
 
   # -1 spotbugs issues that show up prior to the patch being applied
   YETUS_ARGS+=("--spotbugs-strict-precheck")
